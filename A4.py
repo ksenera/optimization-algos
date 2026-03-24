@@ -6,46 +6,31 @@ INSTRUCTOR: Gagan Sidhu
 DATE: Tuesday, March 10th 
 """
 
-import numpy as np
-
 A_matrix = [[2.9766, 0.3945, 0.4198, 1.1159],
             [0.3945, 2.7328, -0.3097, 0.1129],
             [0.4198, -0.3097, 2.5675, 0.6079],
             [1.1159, 0.1129, 0.6079, 1.7231]]
 
-# lower triangle system Lx = b
+
 def forwardSub(L, b):
-    # declare and initialize output vector x
     n = len(b)
     x = [0.0] * n
-    # for j = 1 to n {loop over cols.} 
-    # got length of b vector and put it in n to start loop
     for j in range(n):
-        # xj = bj/Ljj {compute soln. component}
         x[j] = b[j] / L[j][j]
-
-        # for i = j + 1 to n 
-        # j starts at index 0 so j + 1 = 1 & n = 4 so from index 1 up to index 3 
-        # range start to stop index n-1 => 4-1 = 3 
         for i in range(j+1,n):
-            # bi = bi - Lijxj {update RHS}
             b[i] = b[i] - L[i][j] * x[j]
     return x
 
-# upper triangle system Ux = b 
+
 def backSub(U, b):
-    # declare and initialize output vector x
     n = len(b)
     x = [0.0] * n
-    # for j = n to 1 {loop backwards over cols.} 
     for j in reversed(range(n)):
-        # xj = bj/Ujj {compute soln. component}
-        x[j] = b[j] / U[j][j]
-        # for i = 1 to j - 1
-        # range starts at 1 and stops at j-1
-        # using range(stop) => j => j-1 
+        if abs(U[j][j]) < 1e-12:
+            x[j] = 0.0
+        else:
+            x[j] = b[j] / U[j][j]
         for i in range(j):
-            # bi = bi - uijxj {update RHS}
             b[i] = b[i] - U[i][j] * x[j]
     return x
 
@@ -116,9 +101,10 @@ def RayleighQuotient(A, x, tolerance):
         # xold = x
         xold = x
         # x = y / norm(y)
-        x = y / norm(y)
+        x = [y[k] / norm(y) for k in range(n)]
         # if norm(x - xold) < tolerance: flag = False
-        if norm(x - xold) < tolerance:
+        diff = [x[k] - xold[k] for k in range(n)]
+        if norm(diff) < tolerance:
             return False
         # iterations += 1
         iterations += 1
@@ -132,11 +118,15 @@ def qrIteration(A, tolerance):
     iterations = 0
     flag = True
     while flag:
+        # Use QR = A to determine Q and R via Householder transformation
         Q = gramSchmidt(A)
         R = [[sum(Q[i][k] * A[k][j] for k in range(n)) for j in range(n)] for i in range(n)]
+        # Anew = R*Q
         Anew = [[sum(R[i][k] * Q[k][j] for k in range(n)) for j in range(n)] for i in range(n)]
+        # eignValusNew = diagonal elements of Anew
         eigenvalNew = [Anew[i][i] for i in range(n)]
         iterations += 1 
+        # if norm(eigenvalues – eignValusNew)<tolerance:
         diff = norm([eigenvalNew[i] - eigenvalues[i] for i in range(n)])
         if diff < tolerance:
             return eigenvalNew, iterations
@@ -171,3 +161,18 @@ def dot(a, b):
 
 def norm(x):
     return sum(x[i]**2 for i in range(len(x))) ** 0.5
+
+
+if __name__ == "__main__":
+    tol = 0.0001
+    vectors = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
+    names = ["e1","e2","e3","e4"]
+
+    print("# Starting Eigen vector Eigen value Number of iterations")
+    for idx in range(4):
+        sigma, iters = RayleighQuotient(A_matrix, vectors[idx], tol)
+        print(idx+1, names[idx], sigma, iters)
+
+    eigenvalues, iterations = qrIteration(A_matrix, tol)
+    print("The eigen values are:", eigenvalues)
+    print("The number of iterations for the convergence is:", iterations)
