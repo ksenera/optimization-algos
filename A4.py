@@ -61,18 +61,18 @@ def RayleighQuotient(A, x, tolerance):
     n = len(x)
     iterations = 0
     flag = True
-    
     while flag:
-        # sigma = (x^T A x) / (x^T x)
         Ax = [sum(A[i][j] * x[j] for j in range(n)) for i in range(n)]
         sigma = dot(x, Ax) / dot(x, x)
-        # solve (A - sigma*I)y = x using gaussElim
         B = [row[:] for row in A]
         for i in range(n):
             B[i][i] -= sigma
         y = gaussElim(B, x[:])
-        # xold = x
-        xold = x
+        mag = norm(y)
+        if mag < 1e-12:
+            flag = False
+        else:
+            xold = x[:]
         # x = y / norm(y)
         x = [y[k] / norm(y) for k in range(n)]
         # if norm(x - xold) < tolerance: flag = False
@@ -110,23 +110,14 @@ def qrIteration(A, tolerance):
 def gramSchmidt(A):
     n = len(A)
     Q = []
-    
     for j in range(n):
-        # extract column j from A
         v = [A[i][j] for i in range(n)]
-        
-        # subtract out projection of every already-locked vector
         for i in range(j):
-            # measure pollution: dot(v, Q[i]) / dot(Q[i], Q[i])
             proj = dot(v, Q[i])/dot(Q[i], Q[i])
-            # subtract it out
             v = [v[k] - proj * Q[i][k] for k in range(n)]
-        
-        # normalize: divide by magnitude
         mag = dot(v, v) ** 0.5
         q = [v[k] / mag for k in range(n)]
         Q.append(q)
-    
     return Q
 
 def dot(a, b):
