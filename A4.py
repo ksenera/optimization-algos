@@ -73,16 +73,13 @@ def RayleighQuotient(A, x, tolerance):
             flag = False
         else:
             xold = x[:]
-        # x = y / norm(y)
-        x = [y[k] / norm(y) for k in range(n)]
-        # if norm(x - xold) < tolerance: flag = False
-        diff = [x[k] - xold[k] for k in range(n)]
-        if norm(diff) < tolerance:
-            return False
-        # iterations += 1
-        iterations += 1
-    
-        return sigma, iterations
+            x = [y[k] / mag for k in range(n)]
+            iterations += 1
+            diff1 = norm([x[k] - xold[k] for k in range(n)])
+            diff2 = norm([x[k] + xold[k] for k in range(n)])
+            if min(diff1, diff2) < tolerance:
+                flag = False
+    return sigma, iterations
     
 
 def qrIteration(A, tolerance):
