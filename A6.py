@@ -30,7 +30,14 @@ def newton(f, grad_f, hessian_f, x0, step_fn, tol=1e-5, max_iter=1000):
         H = hessian_f(x)
         if np.isscalar(x):
             print(f"{k:<5}{x:<15.6f}{f(x):<15.6f}{g:<15.6f}")
-        x = x + step_fn(H, g)
+        else:
+            xy  = f"({x[0]:.4f}, {x[1]:.4f})"
+            gxy = f"[{g[0]:.4f}, {g[1]:.4f}]"
+            print(f"{k:<5}{xy:<20}{f(x):<15.6f}{gxy:<25}")
+        if norm(g) < tol:
+            break
+        s = compute_step(H, g)
+        x = x + s
     return x
 
 
@@ -45,6 +52,16 @@ def newton_nd(f, grad_f, hessian_f, x0, tol=1e-5):
     print(f"{'k':<5}{'(x, y)':<20}{'f(x,y)':<15}{'grad f(x,y)':<25}")
     print("-" * 65)
     return newton(f, grad_f, hessian_f, np.array(x0, dtype=float), tol)
+
+
+def f1(x):
+    return x**2 - 2*x + 1
+ 
+def derivative_f1(x):
+    return 2*x - 2
+ 
+def double_deri_f1(x):
+    return 2.0
 
 if __name__ == "__main__":
 
