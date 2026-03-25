@@ -12,6 +12,12 @@ def norm(v):
         return abs(v)
     return (v[0]**2 + v[1]**2) ** 0.5
 
+def compute_step(H, g):
+    if np.isscalar(H):
+        return -g / H
+    else:
+        return solve_2x2(H, -g)
+
 # NEWTON reusable from ALGO 6.1 
 #x₀ = initial guess
 #for k = 0, 1, 2, ...
