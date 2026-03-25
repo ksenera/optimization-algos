@@ -66,7 +66,8 @@ def double_deri_f1(x):
 if __name__ == "__main__":
 
     print(" Algorithm 1 (1-D) ")
-    newton_1d(f1, df1, ddf1, x0=0.5)
+    print("f(x) = x^2 - 2x + 1,  interval [-0.5, 1.5],  tol = 1e-5")
+    newton_1d(f1, derivative_f1, double_deri_f1, x0=0.5)
 
     print("\n Algorithm 2 (N-D) ")
     newton_nd(f2, grad_f2, hessian_f2, x0=[-1.0, 1.0])
